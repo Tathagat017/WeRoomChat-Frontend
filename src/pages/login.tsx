@@ -16,7 +16,8 @@ import { SideImageRenderer } from "../components/side-image-renderer";
 import { useStore } from "../hooks/use-store";
 import { useStyles } from "../styles/login-styles";
 import { notifications } from "@mantine/notifications";
-import { IconUser } from "@tabler/icons-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser, faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 
 const Login = observer(function Login() {
   const [email, setEmail] = useState("");
@@ -33,13 +34,25 @@ const Login = observer(function Login() {
     if (!validateInputs()) return;
 
     const result = await apiStore.loginUser({ email, password });
-    if (result) navigate("/dashboard");
-    notifications.show({
-      title: "Login successful",
-      withCloseButton: true,
-      icon: <IconUser />,
-      message: "You have successfully logged in",
-    });
+    if (result) {
+      navigate("/rooms");
+      notifications.show({
+        title: "Login successful",
+        withCloseButton: true,
+        icon: <FontAwesomeIcon icon={faUser} size="sm" />,
+        message: "You have successfully logged in",
+      });
+    } else {
+      notifications.show({
+        title: "Login failed",
+        withCloseButton: true,
+
+        icon: (
+          <FontAwesomeIcon icon={faCircleExclamation} size="lg" color="red" />
+        ),
+        message: "Failed to login,Please try again later",
+      });
+    }
   };
 
   const validateInputs = () => {

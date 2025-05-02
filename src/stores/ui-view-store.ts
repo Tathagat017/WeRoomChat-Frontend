@@ -1,13 +1,25 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 
 export class UiViewStore {
-  sidebarOpen = false;
+  _sidebarOpen = false;
+  _createRoomModalOpen = false;
+  _roomSearchText: string = "";
+  _showPublicOnly = false;
 
   constructor() {
     makeAutoObservable(this);
   }
 
   toggleSidebar() {
-    this.sidebarOpen = !this.sidebarOpen;
+    this._sidebarOpen = !this._sidebarOpen;
+  }
+  get CreateRoomModalOpen() {
+    return this._createRoomModalOpen;
+  }
+
+  set CreateRoomModalOpen(value: boolean) {
+    runInAction(() => {
+      this._createRoomModalOpen = value;
+    });
   }
 }

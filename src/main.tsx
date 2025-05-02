@@ -13,7 +13,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={store.queryClient}>
       <StoreProvider>
         <MantineProvider withGlobalStyles withNormalizeCSS>
-          <Notifications position="top-right" zIndex={2077} />
+          <Notifications position="bottom-right" zIndex={2077} />
           <App />
         </MantineProvider>
       </StoreProvider>

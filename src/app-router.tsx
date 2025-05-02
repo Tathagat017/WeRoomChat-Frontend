@@ -6,10 +6,12 @@ import RegisterPage from "./pages/register";
 import { Layout } from "./components/layout";
 import { PublicLayout } from "./components/public-layout";
 import LandingPage from "./pages/landing";
+import { Invitations } from "./pages/invitations";
 
 const Login = lazy(() => import("./pages/login"));
-const Dashboard = lazy(() => import("./pages/dashboard"));
-
+const Rooms = lazy(() => import("./pages/rooms"));
+const RoomJoin = lazy(() => import("./pages/room-join"));
+const RoomChatHistory = lazy(() => import("./pages/room-chat-history"));
 const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -30,8 +32,13 @@ const AppRouter = () => {
               </AuthenticatedRoute>
             }
           >
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/about" element={<div>About Page</div>} />
+            <Route path="/rooms" element={<Rooms />} />
+            <Route path="/invitations" element={<Invitations />} />
+            <Route path="/room/:roomId" element={<RoomJoin />} />
+            <Route
+              path="/room/chatHistory/:roomId"
+              element={<RoomChatHistory />}
+            />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

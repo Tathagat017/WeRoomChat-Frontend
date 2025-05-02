@@ -1,14 +1,17 @@
-// stores/StoreContext.tsx
 import { createContext, ReactNode } from "react";
 import { AuthStore } from "./auth-store";
 import { UiViewStore } from "./ui-view-store";
 import { QueryClient } from "@tanstack/react-query";
+import { SocketStore } from "./socket-store";
+import { RoomStore } from "./room-store";
 
 const queryClient = new QueryClient();
+const socketStore = new SocketStore();
 
 export const store = {
-  authStore: new AuthStore(queryClient),
+  authStore: new AuthStore(queryClient, socketStore),
   uiViewStore: new UiViewStore(),
+  roomStore: new RoomStore(queryClient),
   queryClient,
 };
 

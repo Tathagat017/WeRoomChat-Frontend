@@ -2,27 +2,37 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import axios, { AxiosResponse } from "axios";
 import { QueryClient } from "@tanstack/react-query";
-
+import { SocketStore } from "./socket-store";
+import { QueryKeys } from "../types/query-keys";
 export interface User {
   full_name: string;
   email: string;
-  token: string;
+  token?: string;
+  id?: string;
 }
 
 export class AuthStore {
   user: User | null = null;
+  token: string | null = null;
+  allUsers: User[] = [];
   queryClient: QueryClient;
-
-  constructor(queryClient: QueryClient) {
-    this.queryClient = queryClient;
+  socketStore: SocketStore;
+  isAuthenticated: boolean = false;
+  constructor(queryClient: QueryClient, socketStore: SocketStore) {
     makeAutoObservable(this);
+    this.queryClient = queryClient;
     this.loadUserFromLocalStorage();
+    this.socketStore = socketStore;
   }
 
   private baseUrl: string = import.meta.env.VITE_API_BASE_URL;
 
-  get isAuthenticated() {
+  get IsAuthenticated() {
     return !!this.user?.token;
+  }
+
+  get AllUsers() {
+    return this.allUsers;
   }
 
   login(user: User) {
@@ -34,6 +44,44 @@ export class AuthStore {
     this.user = null;
     localStorage.removeItem("user");
     this.queryClient.clear();
+    this.socketStore.disconnect();
+  }
+
+  get BaseUrl() {
+    return this.baseUrl;
+  }
+
+  get UserId() {
+    const stored = localStorage.getItem("user");
+    if (stored) {
+      try {
+        return JSON.parse(stored).userId;
+      } catch {
+        //
+      }
+    }
+  }
+
+  get Token() {
+    const stored = localStorage.getItem("token");
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        //
+      }
+    }
+  }
+
+  get User() {
+    const stored = localStorage.getItem("user");
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        //
+      }
+    }
   }
 
   private loadUserFromLocalStorage() {
@@ -58,6 +106,10 @@ export class AuthStore {
         `${this.baseUrl}users/signup`,
         payload
       );
+      runInAction(() => {
+        this.queryClient.invalidateQueries([QueryKeys.AllUsers]);
+        this.allUsers.push(res.data);
+      });
       return res.data;
     } catch (error) {
       console.error("Signup failed:", error);
@@ -77,8 +129,12 @@ export class AuthStore {
       const userData = res.data;
       runInAction(() => {
         this.user = userData;
+        this.token = userData.token ?? null;
+        this.isAuthenticated = true;
       });
       localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("token", JSON.stringify(userData.token));
+      this.socketStore.connect();
       return userData;
     } catch (error) {
       console.error("Login failed:", error);
@@ -106,6 +162,21 @@ export class AuthStore {
       return res.data;
     } catch {
       return null;
+    }
+  }
+
+  async fetchAllUsers(): Promise<User[]> {
+    try {
+      const res = await axios.get<User[]>(`${this.baseUrl}users/allUsers`, {
+        headers: { Authorization: `Bearer ${this.user?.token}` },
+      });
+      runInAction(() => {
+        this.allUsers = res.data;
+      });
+      return res.data;
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      throw new Error("Failed to fetch users");
     }
   }
 

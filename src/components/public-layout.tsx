@@ -1,6 +1,5 @@
 import { Outlet } from "react-router-dom";
 import { NavBar } from "./navbar";
-import { Footer } from "./footer";
 
 export const PublicLayout = () => {
   return (
@@ -13,10 +12,9 @@ export const PublicLayout = () => {
       }}
     >
       <NavBar />
-      <div style={{ flex: 1, height: "calc(100vh - 145px)" }}>
+      <div style={{ flex: 1, overflow: "hidden" }}>
         <Outlet />
       </div>
-      <Footer />
     </div>
   );
 };

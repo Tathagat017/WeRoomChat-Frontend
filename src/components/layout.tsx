@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { NavBar } from "../components/navbar";
-import { Footer } from "./footer";
+import { CreateRoomModal } from "./create-room-modal";
 
 export const Layout = () => (
   <div
@@ -12,9 +12,9 @@ export const Layout = () => (
     }}
   >
     <NavBar />
-    <div style={{ flex: 1 }}>
+    <CreateRoomModal />
+    <div style={{ flex: 1, overflow: "hidden" }}>
       <Outlet />
     </div>
-    <Footer />
   </div>
 );

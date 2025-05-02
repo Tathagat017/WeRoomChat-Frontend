@@ -8,5 +8,5 @@ interface Props {
 
 export const AuthenticatedRoute = observer(({ children }: Props) => {
   const { authStore: apiStore } = useStore();
-  return apiStore.isAuthenticated ? children : <Navigate to="/login" />;
+  return apiStore.IsAuthenticated ? children : <Navigate to="/login" />;
 });

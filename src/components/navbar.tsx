@@ -6,20 +6,20 @@ import {
   createStyles,
   Drawer,
   Group,
+  Indicator,
   Menu,
   Stack,
   Text,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../hooks/use-store";
 
 const links = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
+  { label: "Chat Rooms", href: "/rooms" },
+  { label: "Create Room", href: "/createRoom" },
 ];
 
 const useStyles = createStyles((theme) => ({
@@ -52,10 +52,15 @@ export const NavBar = observer(function NavBar() {
   const [active, setActive] = useState("Home");
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { classes } = useStyles();
-  const { authStore: apiStore } = useStore();
-  const isLoggedIn = apiStore.isAuthenticated;
+  const { authStore: apiStore, uiViewStore } = useStore();
+  const navigate = useNavigate();
+  const isLoggedIn = apiStore.IsAuthenticated;
 
-  const items = links.map((link) => (
+  const linksToShow = isLoggedIn
+    ? links
+    : links.filter((l) => l.label !== "Create Room");
+
+  const items = linksToShow.map((link) => (
     <Button
       key={link.label}
       variant="subtle"
@@ -63,13 +68,21 @@ export const NavBar = observer(function NavBar() {
       onClick={() => {
         setActive(link.label);
         close();
+        if (link.label === "Create Room") {
+          uiViewStore.CreateRoomModalOpen = true;
+        } else {
+          navigate(link.href);
+        }
       }}
       component="a"
-      href={link.href}
     >
       {link.label}
     </Button>
   ));
+
+  useEffect(() => {
+    console.log(apiStore.socketStore.Notification); // Check if notifications are being updated
+  }, [apiStore.socketStore.Notification]);
 
   return (
     <Container fluid px="md" py="sm" className={classes.navbar}>
@@ -112,18 +125,32 @@ export const NavBar = observer(function NavBar() {
 
 const AvatarPopover = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
   const navigate = useNavigate();
+  const { authStore } = useStore();
+  const handleLogOut = async () => {
+    await authStore.logout();
+    navigate("/");
+  };
 
   return (
     <Menu width={150} withArrow>
       <Menu.Target>
         <Group spacing="md">
-          <Avatar color="blue" radius="xl"></Avatar>
+          <NavAvatar />
         </Group>
       </Menu.Target>
       <Menu.Dropdown>
         <Stack>
+          {isLoggedIn && (
+            <Button
+              fullWidth
+              variant="subtle"
+              onClick={() => navigate("/invitations")}
+            >
+              {"Invitations"}
+            </Button>
+          )}
           {isLoggedIn ? (
-            <Button fullWidth variant="subtle">
+            <Button fullWidth variant="subtle" onClick={handleLogOut}>
               {"Logout"}
             </Button>
           ) : (
@@ -149,3 +176,19 @@ const AvatarPopover = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
     </Menu>
   );
 };
+
+const NavAvatar = observer(function NavAvatar() {
+  const { authStore } = useStore();
+  const notificationsCount = authStore.socketStore.notifications.length;
+  return (
+    <Indicator
+      size={8}
+      offset={3}
+      disabled={notificationsCount === 0}
+      color="red"
+      label={notificationsCount > 0 ? notificationsCount.toString() : ""}
+    >
+      <Avatar radius="xl" />
+    </Indicator>
+  );
+});
