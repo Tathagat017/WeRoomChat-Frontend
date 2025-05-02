@@ -9,12 +9,12 @@ import {
   Indicator,
   Menu,
   Stack,
-  Text,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LogoImage from "../assets/images/loop_logo.png";
 import { useStore } from "../hooks/use-store";
 
 const links = [
@@ -87,9 +87,16 @@ export const NavBar = observer(function NavBar() {
   return (
     <Container fluid px="md" py="sm" className={classes.navbar}>
       {/* Logo */}
-      <Text fw={700} size="xl">
-        MyLogo
-      </Text>
+      <img
+        src={LogoImage}
+        alt="Logo"
+        style={{
+          width: "50px",
+          height: "50px",
+          borderRadius: "50%",
+          marginRight: "10px",
+        }}
+      ></img>
 
       {/* Desktop nav */}
       {!isMobile && (
